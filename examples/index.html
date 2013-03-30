@@ -4,11 +4,11 @@
     <title>Circle text</title>
     <meta charset="utf-8">
     <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="circle-text.js/circle-text.js"></script>
+    <script src="circle-text.js"></script>
     <style>
       #container {
         margin: auto;
-        width: 90%;
+        width: 800px;
       }
 
       svg {
@@ -21,8 +21,7 @@
       }
 
       circle {
-        fill: none;
-        stroke: black;
+        stroke: none;
       }
     </style>
   </head>
@@ -31,19 +30,19 @@
     <script>
       var circles = [
         {
-          cx: 120,
+          cx: 200,
           cy: 300,
           r: 15,
           text: 'A'
         },
         {
-          cx: 200,
+          cx: 400,
           cy: 300,
           r: 50,
           text: 'plugin'
         },
         {
-          cx: 450,
+          cx: 600,
           cy: 300,
           r: 100,
           text: 'for text inside circles!'
@@ -69,7 +68,9 @@
 
       gs.append('circle')
         .attr('cx', 0).attr('cy', 0)
-        .attr('r', function (d) { return d.r; });
+        .attr('r', function (d) { return d.r; })
+        .attr('fill', function (d, i) { return colors(i); })
+        .attr('fill-opacity', '0.3');
 
       var texts = gs.call(circleText);
 

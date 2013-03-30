@@ -57,51 +57,6 @@
       return rgb.darker().toString();
     }
 
-    function _bubbleChart_old(vis, nestedDomains, opts) {
-
-      var packer = d3.layout.pack()
-                    .value(function (d) { return 1; })
-                    .size([opts.w, opts.h]);
-
-      var nodes = packer.nodes(nestedDomains);
-
-      vis.selectAll('circle')
-          .data(nodes)
-        .enter()
-          .append('circle')
-          .attr({
-            'class': function (d) { return d.children ? "parent" : "child"; },
-            id: function (d) { return d.name; },
-            cx: function (d) { return d.x; },
-            cy: function (d) { return d.y; },
-            r: function (d) { return d.r; }
-          })
-          .style({
-            stroke: function (d) { return darkenRGB(opts.color(d.depth)); },
-            'stroke-width': '1px',
-            fill: function (d) { return opts.color(d.depth); },
-            opacity: function (d) { return d.children ? 0.5 : 1; },
-          });
-
-      vis.selectAll('text')
-          .data(nodes)
-        .enter()
-          .append('text')
-          .attr({
-            'class': function (d) { return d.children ? "parent" : "child"; },
-            x: function (d) { return d.x; },
-            dy: function (d) { return (!d.children && "0.35em") || null; },
-            y: function (d) { return d.y + (d.children ? 0.75 * d.r : 0); },
-          })
-          .style({
-            'text-anchor': "middle",
-            stroke: "none",
-            "font-size": function (d) { return (200 / (d.depth + 1)) + "%"; },
-            fill: 'white',
-          })
-          .text(function (d) { return d.name; });
-    }
-
     function _bubbleChart(vis, nestedDomains, opts) {
       var packer = d3.layout.pack()
                     .value(function (d) { return 1; })
@@ -113,6 +68,7 @@
       var circleText = d3.circleText()
                         .radius(function (d) { return d.r - 5; })
                         .value(function (d) { return d.name; })
+                        .precision(0.1)
                         .fontSize(fontSize);
 
       var gCircles = vis.selectAll('g.circle')
@@ -166,7 +122,7 @@
     function draw(domains) {
       "use strict";
 
-      var w = 800, h = 600,
+      var w = 800, h = 500,
           x = d3.scale.linear().range([0, w]),
           y = d3.scale.linear().range([0, h]),
           color = d3.scale.category10();
