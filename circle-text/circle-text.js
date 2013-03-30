@@ -5,6 +5,7 @@ d3.circleText = function () {
     var radius = function (d) { return d.r; },
         value = function (d) { return d.value; },
         fontSize = d3.functor('100%'),
+        method = "stretch", spacing = "auto",
         precision = 1;
 
     function _draw(selection) {
@@ -51,6 +52,8 @@ d3.circleText = function () {
             var arcTextPath = arcText.select(':first-child')
                                   .attr('xlink:href', '#' + arcId)
                                   .attr('visibility', 'hidden')
+                                  .attr('method', method)
+                                  .attr('spacing', spacing)
                                   .text(value);
 
             var textBBox = arcText.node().getBBox(),
@@ -142,7 +145,19 @@ d3.circleText = function () {
 
     _draw.fontSize = function (_) {
         if (arguments.length === 0) return fontSize;
-        fontSize = _;
+        fontSize = d3.functor(_);
+        return _draw;
+    };
+
+    _draw.method = function (_) {
+        if (arguments.length === 0) return method;
+        method = _;
+        return _draw;
+    };
+
+    _draw.spacing = function (_) {
+        if (arguments.length === 0) return spacing;
+        spacing = _;
         return _draw;
     };
 
