@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="circle-text.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>
+
+    function _nest(values, depth) {
+      var firstLevel = {},
+          res = {};
+
+      res.name = values[0]
+                  .slice((depth >= 1) ? depth - 1 : 0, depth)
+                  .reverse()
+                  .join('.');
+
+      values.forEach(function (v) {
+        if (v[depth]) {
+          if (!firstLevel.hasOwnProperty(v[depth])) {
+            firstLevel[v[depth]] = [];
+          }
+          firstLevel[v[depth]].push(v);
+        }
+      });
+
+      var nextLevels = Object.keys(firstLevel);
+
+      if (nextLevels.length > 0) {
+        res.children = [];
+        nextLevels.forEach(function (key) {
+          res.children.push(_nest(firstLevel[key], depth + 1));
+        });
+      }
+
+      // Collapsing domains
+      while ( res.children && 
+              res.children.length === 1) {
+        res.name = res.children[0].name+ '.' + res.name;
+        res.children = res.children[0].children;
+      }
+
+      return res;
+    }
+
+    function nest(domains) {
+      "use strict";
+      var splitDomains = domains.map(function (d) {
+        return d.split('.').reverse();
+      });
+
+      return _nest(splitDomains, 1);
+    }
+
+    function darkenRGB(strColor) {
+      var rgb = d3.rgb(strColor);
+      return rgb.darker().toString();
+    }
+
+    function _bubbleChart_old(vis, nestedDomains, opts) {
+
+      var packer = d3.layout.pack()
+                    .value(function (d) { return 1; })
+                    .size([opts.w, opts.h]);
+
+      var nodes = packer.nodes(nestedDomains);
+
+      vis.selectAll('circle')
+          .data(nodes)
+        .enter()
+          .append('circle')
+          .attr({
+            'class': function (d) { return d.children ? "parent" : "child"; },
+            id: function (d) { return d.name; },
+            cx: function (d) { return d.x; },
+            cy: function (d) { return d.y; },
+            r: function (d) { return d.r; }
+          })
+          .style({
+            stroke: function (d) { return darkenRGB(opts.color(d.depth)); },
+            'stroke-width': '1px',
+            fill: function (d) { return opts.color(d.depth); },
+            opacity: function (d) { return d.children ? 0.5 : 1; },
+          });
+
+      vis.selectAll('text')
+          .data(nodes)
+        .enter()
+          .append('text')
+          .attr({
+            'class': function (d) { return d.children ? "parent" : "child"; },
+            x: function (d) { return d.x; },
+            dy: function (d) { return (!d.children && "0.35em") || null; },
+            y: function (d) { return d.y + (d.children ? 0.75 * d.r : 0); },
+          })
+          .style({
+            'text-anchor': "middle",
+            stroke: "none",
+            "font-size": function (d) { return (200 / (d.depth + 1)) + "%"; },
+            fill: 'white',
+          })
+          .text(function (d) { return d.name; });
+    }
+
+    function _bubbleChart(vis, nestedDomains, opts) {
+      var packer = d3.layout.pack()
+                    .value(function (d) { return 1; })
+                    .size([opts.w, opts.h]);
+
+      var nodes = packer.nodes(nestedDomains);
+
+      var fontSize = function (d) { return (200 / (d.depth + 1)) + "%"; };
+      var circleText = d3.circleText()
+                        .radius(function (d) { return d.r - 5; })
+                        .value(function (d) { return d.name; })
+                        .fontSize(fontSize);
+
+      var gCircles = vis.selectAll('g.circle')
+                        .data(nodes)
+                      .enter()
+                        .append('g')
+                        .classed('circle', true)
+                        .attr('transform', function (d) {
+                          return 'translate(' + d.x + ',' + d.y + ')';
+                        });
+
+      gCircles.append('circle')
+          .attr({
+            'class': function (d) { return d.children ? "parent" : "child"; },
+            cx: 0,
+            cy: 0,
+            r: function (d) { return d.r; }
+          })
+          .style({
+            stroke: function (d) { return darkenRGB(opts.color(d.depth)); },
+            'stroke-width': '1px',
+            fill: function (d) { return opts.color(d.depth); },
+            opacity: function (d) { return d.children ? 0.5 : 1; },
+          });
+
+      var gTexts = vis.selectAll('g.label')
+                        .data(nodes)
+                      .enter()
+                        .append('g')
+                        .classed('label', true)
+                        .attr('transform', function (d) {
+                          return 'translate(' + d.x + ',' + d.y + ')';
+                        });
+
+      gTexts.filter(function (d) { return !!d.children; })
+        .call(circleText)
+        .style('fill', 'white');
+
+      gTexts.filter(function (d) { return !d.children; })
+        .append('text')
+        .attr('dy', '0.35em')
+        .style({
+          'text-anchor': "middle",
+          stroke: "none",
+          "font-size": fontSize,
+          fill: 'white',
+        })
+        .text(function (d) { return d.name; });
+    }
+
+    function draw(domains) {
+      "use strict";
+
+      var w = 800, h = 600,
+          x = d3.scale.linear().range([0, w]),
+          y = d3.scale.linear().range([0, h]),
+          color = d3.scale.category10();
+
+      var opts = {
+        w: w,
+        h: h,
+        x: x,
+        y: y,
+        color: color
+      };
+
+      var nestedDomains = nest(domains);
+
+      var vis = d3.select('#container')
+                  .append('svg')
+                  .attr({
+                    width: w,
+                    height: h
+                  })
+                  .append('g')
+                  .attr('transform', 
+                    'translate(' + 0 + ',' + 0 + ')');
+
+      _bubbleChart(vis, nestedDomains, opts);
+    }
+  </script>
+
+  <style>
+
+    #container { width: 100%; }
+
+    svg {
+      display: block;
+      margin: auto;
+    }
+
+    text {
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    text.parent {
+      fill: #1f77b4;
+    }
+
+    circle {
+      pointer-events: all;
+    }
+
+    circle.parent {
+      stroke: steelblue;
+    }
+
+    circle.child {
+      pointer-events: none;
+    }
+
+    .arc-path {
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+<div id="container"></div>
+<script>
+var domains = [       
+                          '00.names.playground.utkarshu.in',
+                          '00.db.playground.utkarshu.in',
+                        '00.server.playground.utkarshu.in',
+                        '01.server.playground.utkarshu.in',
+                                'new.stable.utkarshu.in',
+                                'db.stable.utkarshu.in',
+                                'mailbox.stable.utkarshu.in',
+                                 'data.stable.utkarshu.in',
+                              'server.stable.utkarshu.in',
+                                  'login.utkarshu.in',
+                    '00.redirects.fun.utkarshu.in',
+                    '01.redirects.fun.utkarshu.in',
+                                'private.experiments.utkarshu.in',
+                                'public.experiments.utkarshu.in',
+                               '00.serenity.utkarshu.in',
+                               '01.serenity.utkarshu.in',
+                            'integration.serenity.utkarshu.in',
+                          '00.db.other.utkarshu.in',
+                        '00.server.other.utkarshu.in',
+                          'old.data.utkarshu.in',
+                                 'monitor.utkarshu.in',
+                           '00.new.archive.utkarshu.in',
+                           '00.db.archive.utkarshu.in',
+                         '00.server.archive.utkarshu.in',
+                       '00.redirects.unstable.utkarshu.in',
+                       '01.redirects.unstable.utkarshu.in',
+                  ]
+</script>
+<script>
+  draw(domains);
+</script>
+</body>

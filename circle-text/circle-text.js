@@ -1,9 +1,10 @@
 /*globals d3*/
 (function () {
-d3.drawCircle = function () {
+d3.circleText = function () {
     "use strict";
     var radius = function (d) { return d.r; },
         value = function (d) { return d.value; },
+        fontSize = d3.functor('100%'),
         precision = 1;
 
     function _draw(selection) {
@@ -33,7 +34,8 @@ d3.drawCircle = function () {
                 .append('textPath')
                 .attr('startOffset', '0%');
 
-            var arcText = g.selectAll('text.arc-text');
+            var arcText = g.selectAll('text.arc-text')
+                            .style('font-size', fontSize);
 
             /* There is a bug in Chrome which makes it impossible to select
              * camel case tags, like textPath.  Hence, using the :first-child
@@ -135,6 +137,12 @@ d3.drawCircle = function () {
     _draw.precision = function (_) {
         if (arguments.length === 0) return precision;
         precision = _;
+        return _draw;
+    };
+
+    _draw.fontSize = function (_) {
+        if (arguments.length === 0) return fontSize;
+        fontSize = _;
         return _draw;
     };
 

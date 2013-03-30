@@ -4,7 +4,7 @@
     <title>Circle text</title>
     <meta charset="utf-8">
     <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="circle-text.js"></script>
+    <script src="circle-text.js/circle-text.js"></script>
     <style>
       #container {
         margin: auto;
@@ -54,7 +54,7 @@
                   .append('svg'),
           colors = d3.scale.category10();
 
-      var drawCircle = d3.drawCircle()
+      var circleText = d3.circleText()
                         .radius(function (d) { return d.r - 5; })
                         .value(function (d) { return d.text; })
                         .precision(0.1);
@@ -71,7 +71,7 @@
         .attr('cx', 0).attr('cy', 0)
         .attr('r', function (d) { return d.r; });
 
-      var texts = gs.call(drawCircle);
+      var texts = gs.call(circleText);
 
       texts
         .attr('stroke', 'none')
