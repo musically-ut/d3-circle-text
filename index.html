@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle text</title>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="circle-text.js"></script>
+    <style>
+      #container {
+        margin: auto;
+        width: 90%;
+      }
+
+      svg {
+        width: 100%;
+        min-height: 600;
+      }
+
+      .arc-path {
+        visibility: hidden;
+      }
+
+      circle {
+        fill: none;
+        stroke: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+      var circles = [
+        {
+          cx: 120,
+          cy: 300,
+          r: 15,
+          text: 'A'
+        },
+        {
+          cx: 200,
+          cy: 300,
+          r: 50,
+          text: 'plugin'
+        },
+        {
+          cx: 450,
+          cy: 300,
+          r: 100,
+          text: 'for text inside circles!'
+        }
+      ];
+
+      var svg = d3.select('#container')
+                  .append('svg'),
+          colors = d3.scale.category10();
+
+      var drawCircle = d3.drawCircle()
+                        .radius(function (d) { return d.r - 5; })
+                        .value(function (d) { return d.text; })
+                        .precision(0.1);
+
+      var gs = svg.selectAll('g')
+                  .data(circles)
+                  .enter()
+                  .append('g')
+                  .attr('transform', function (d) {
+                    return 'translate(' + d.cx + ',' + d.cy + ')';
+                  });
+
+      gs.append('circle')
+        .attr('cx', 0).attr('cy', 0)
+        .attr('r', function (d) { return d.r; });
+
+      var texts = gs.call(drawCircle);
+
+      texts
+        .attr('stroke', 'none')
+        .attr('fill', function (d, i) { return colors(i); });
+
+    </script>
+  </body>
+</html>
+
