@@ -1,4 +1,4 @@
-# Circle Text
+# d3-circle-text
 
 This is a small [D3](http://d3js.org/) plugin for writing text along the
 bottom of a circle. This was conceived primarily for use with the 
