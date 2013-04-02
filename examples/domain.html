@@ -88,10 +88,10 @@
             r: function (d) { return d.r; }
           })
           .style({
-            stroke: function (d) { return darkenRGB(opts.color(d.depth)); },
+            stroke: function (d) { return darkenRGB("#777"); },
             'stroke-width': '1px',
-            fill: function (d) { return opts.color(d.depth); },
-            opacity: function (d) { return d.children ? 0.5 : 1; },
+            fill: function (d) { return "#777"; },
+            'fill-opacity': function (d) { return d.children ? 0.5 : 1; },
           });
 
       var gTexts = vis.selectAll('g.label')
