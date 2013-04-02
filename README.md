@@ -1,7 +1,9 @@
 # Circle Text
 
 This is a small [D3](http://d3js.org/) plugin for writing text along the
-bottom of a circle.
+bottom of a circle. This was conceived primarily for use with the 
+[d3 circle packing layout](http://bl.ocks.org/mbostock/4063530), as a way of
+placing the labels on intermediate nodes non-obtrusively.
 
 ## Examples
 
