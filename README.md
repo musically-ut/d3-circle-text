@@ -110,7 +110,7 @@ The following properties can be controlled by calling the appropriate functions:
   `value` should be either `"exact"` or `"auto"`.
    
   
- * _precision([value])
+ * _precision([value])_
   
   Get/set the precision used for determining the `startOffset` for the
   `textPath` element. The `startOffset` ranges from `0%` to `50%` in steps of `precision`.
