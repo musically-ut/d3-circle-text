@@ -16,13 +16,13 @@ This plugin is much like the [axis](https://github.com/mbostock/d3/wiki/SVG-Axes
 To use `circleText`, you have to create and configure the following object:
 
 ```javascript
-    var circleText = d3.circleText();
-                      .radius(function (d) { return d.r - 5; })
-                      .value(function (d) { return d.name; })
-                      .method('align')
-                      .spacing('exact')
-                      .precision(0.1)
-                      .fontSize('100%');
+var circleText = d3.circleText();
+        .radius(function (d) { return d.r - 5; })
+        .value(function (d) { return d.name; })
+        .method('align')
+        .spacing('exact')
+        .precision(0.1)
+        .fontSize('100%');
 ```
 
 Then you can call it one a `g` element which has data joined with it. The call
@@ -30,8 +30,8 @@ returns the `text` elements which were added so that further properties may be
 set on them:
 
 ```javascript
-    gTexts.call(circleText)
-      .style('fill', 'white');
+gTexts.call(circleText)
+  .style('fill', 'white');
 ```
 
 This sets the `fill` of the `text` to be `white`.
@@ -52,71 +52,71 @@ This plugin will append the following elements to the `g` it acts on:
 
 The following properties can be controlled by calling the appropriate functions:
 
-#### `radius([value])`
-
-Get/set the accessor for the radius of the path on which the text will be
-written.
-
-If called without any argument, the default accessor is returned:
-
-```javascript
+ * _radius([value])_
+  
+  Get/set the accessor for the radius of the path on which the text will be
+  written.
+  
+  If called without any argument, the default accessor is returned:
+  
+  ```javascript
   function (d) { return d.r; }
-```
-
-`value` can be a constant number or a function which will be passed the data
-elements for evaluation.
-
-
-#### `value([value])`
-
-Get/set the accessor for the text written.
-
-If called without any argument, the default accessor is returned:
-
-```javascript
-  function (d) { return d.value; }
-```
-
-`value` can be a constant number or a function which will be passed the data
-elements for evaluation.
-
-#### `fontSize([value])`
-
-Get/set the accessor for the font-size of the text written.
-
-If called without any argument, the default accessor is returned:
-
-```javascript
-  function (d) { return '100%'; }
-```
-
-`value` can be a constant number or a function which will be passed the data
-elements for evaluation.
-
-
-#### `method([value])`
-
-Get/set the [method](http://www.w3.org/TR/SVG/text.html#TextPathElementMethodAttribute) for the `textPath` element.
-
-If called without any argument, the default value `"stretch"` is returned.
-`value` should be either `"align"` or `"stretch"`.
- 
-
-#### `spacing([value])`
-
-Get/set the [method](http://www.w3.org/TR/SVG/text.html#TextPathElementMethodAttribute) for the `textPath` element.
-
-If called without any argument, the default value `"auto"` is returned.
-`value` should be either `"exact"` or `"auto"`.
- 
-
-#### `precision([value])`
-
-Get/set the precision used for determining the `startOffset` for the
-`textPath` element. The `startOffset` ranges from `0%` to `50%` in steps of `precision`.
-
-If called without any argument, the default value `1` is returned.
-`value` should be a double number.
+  ```
+  
+  `value` can be a constant number or a function which will be passed the data
+  elements for evaluation.
+  
+  
+ * _value([value])_
+  
+  Get/set the accessor for the text written.
+  
+  If called without any argument, the default accessor is returned:
+  
+  ```javascript
+    function (d) { return d.value; }
+  ```
+  
+  `value` can be a constant number or a function which will be passed the data
+  elements for evaluation.
+  
+ * _fontSize([value])_
+  
+  Get/set the accessor for the font-size of the text written.
+  
+  If called without any argument, the default accessor is returned:
+  
+  ```javascript
+    function (d) { return '100%'; }
+  ```
+  
+  `value` can be a constant number or a function which will be passed the data
+  elements for evaluation.
+  
+  
+ * _method([value])_
+  
+  Get/set the [method](http://www.w3.org/TR/SVG/text.html#TextPathElementMethodAttribute) for the `textPath` element.
+  
+  If called without any argument, the default value `"stretch"` is returned.
+  `value` should be either `"align"` or `"stretch"`.
+   
+  
+ * _spacing([value])_
+  
+  Get/set the [spacing](http://www.w3.org/TR/SVG/text.html#TextPathElementSpacingAttribute) for the `textPath` element.
+  
+  If called without any argument, the default value `"auto"` is returned.
+  `value` should be either `"exact"` or `"auto"`.
+   
+  
+ * _precision([value])
+  
+  Get/set the precision used for determining the `startOffset` for the
+  `textPath` element. The `startOffset` ranges from `0%` to `50%` in steps of `precision`.
+  
+  If called without any argument, the default value `1` is returned.
+  `value` should be a double number.
  
 
 ## Working
