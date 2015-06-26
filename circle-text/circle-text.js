@@ -6,7 +6,7 @@ d3.circleText = function () {
         value = function (d) { return d.value; },
         fontSize = d3.functor('100%'),
         method = "stretch", spacing = "auto",
-        precision = 1;
+        precision = null;
 
     function _draw(selection) {
 
@@ -24,7 +24,7 @@ d3.circleText = function () {
 
             g.selectAll('path.arc-path')
                 .attr('id', arcId)
-                .attr('d', function (d) { 
+                .attr('d', function (d) {
                     return circle_d(radius(d)); });
 
             g.selectAll('text.arc-text')
@@ -36,7 +36,8 @@ d3.circleText = function () {
                 .attr('startOffset', '0%');
 
             var arcText = g.selectAll('text.arc-text')
-                            .style('font-size', fontSize);
+                            .style('font-size', fontSize)
+                            .attr('text-anchor', 'middle');
 
             /* There is a bug in Chrome which makes it impossible to select
              * camel case tags, like textPath.  Hence, using the :first-child
@@ -51,38 +52,10 @@ d3.circleText = function () {
              */
             var arcTextPath = arcText.select(':first-child')
                                   .attr('xlink:href', '#' + arcId)
-                                  .attr('visibility', 'hidden')
                                   .attr('method', method)
                                   .attr('spacing', spacing)
-                                  .text(value);
-
-            var textBBox = arcText.node().getBBox(),
-                curTuple,
-                bestOffset = 0;
-
-            var bestTuple = [
-                Math.abs(textBBox.width + textBBox.x * 2),
-                textBBox.height
-            ];
-
-            for(var ii = 0; ii <= 50; ii += precision) {
-                arcTextPath.attr('startOffset', ii + '%');
-
-                textBBox = arcText.node().getBBox();
-                curTuple = [
-                    Math.abs(textBBox.width + textBBox.x * 2),
-                    textBBox.height
-                ];
-
-                if (tupleSort(curTuple, bestTuple) < 0) {
-                    bestOffset = ii;
-                    bestTuple = curTuple;
-                }
-            }
-
-            arcTextPath
-                .attr('startOffset', bestOffset + '%')
-                .attr('visibility', null);
+                                  .text(value)
+                                  .attr('startOffset', '50%');
         });
 
         return selection.selectAll('text.arc-text');
@@ -92,7 +65,7 @@ d3.circleText = function () {
      * Private functions
      */
 
-    /* Code for generating UUID version 4 from: 
+    /* Code for generating UUID version 4 from:
      * http://note19.com/2007/05/27/javascript-guid-generator/
      */
     function s4() {
@@ -114,14 +87,6 @@ d3.circleText = function () {
             ].join('');
     }
 
-    function tupleSort(a, b) {
-        if (a[0] == b[0]) {
-            return (a[1] == b[1]) ? 0 : (a[1] < b[1]) ? -1 : 1;
-        } else {
-            return (a[0] < b[0]) ? -1 : 1;
-        }
-    }
-
     /***************************************
      * Public properties
      */
@@ -138,6 +103,7 @@ d3.circleText = function () {
     };
 
     _draw.precision = function (_) {
+        console.warn('circleText.precision has been deprecated.');
         if (arguments.length === 0) return precision;
         precision = _;
         return _draw;

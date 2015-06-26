@@ -12,7 +12,7 @@ placing the labels on intermediate nodes non-obtrusively.
 
 ## Usage
 
-This plugin is much like the [axis](https://github.com/mbostock/d3/wiki/SVG-Axes) plugin provided with D3.
+This usage pattern this plugin follows is the same as [axis](https://github.com/mbostock/d3/wiki/SVG-Axes) plugin provided with D3.
 To use `circleText`, you have to create and configure the following object:
 
 ```javascript
@@ -21,11 +21,10 @@ var circleText = d3.circleText();
         .value(function (d) { return d.name; })
         .method('align')
         .spacing('exact')
-        .precision(0.1)
         .fontSize('100%');
 ```
 
-Then you can call it one a `g` element which has data joined with it. The call
+Then you can call it on a `g` element which has data joined with it. The call
 returns the `text` elements which were added so that further properties may be
 set on them:
 
@@ -35,6 +34,8 @@ gTexts.call(circleText)
 ```
 
 This sets the `fill` of the `text` to be `white`.
+
+### Internals
 
 This plugin will append the following elements to the `g` it acts on:
 
@@ -111,19 +112,6 @@ The following properties can be controlled by calling the appropriate functions:
    
   
  * _precision([value])_
-  
-  Get/set the precision used for determining the `startOffset` for the
-  `textPath` element. The `startOffset` ranges from `0%` to `50%` in steps of `precision`.
-  
-  If called without any argument, the default value `1` is returned.
-  `value` should be a double number.
+
+  **Deprecated:** This function does NOT have any effect now.  
  
-
-## Working
-
-Internally, this plugin works by placing the `textPath` element with the `startoffset` ranging from `0%` to `50%` in steps of the `precision` provided and chooses the offset which results in:
-
- 1. Most symmetrical placement of the bounding box around the vertical diameter
- 2. If two placements are equally symmetrical, then chooses the one with the lesser height.
-
- Case 2 occurs for texts which are longer than half the circumference of the circle provided.
