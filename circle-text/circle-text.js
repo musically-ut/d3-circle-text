@@ -4,40 +4,47 @@ d3.circleText = function () {
     "use strict";
     var radius = function (d) { return d.r; },
         value = function (d) { return d.value; },
-        fontSize = d3.functor('100%'),
+        fontSize = '100%',
         method = "stretch", spacing = "auto",
-        precision = null;
+        position = "50%", precision = null;
 
     function _draw(selection) {
 
         selection.each(function (d, i) {
             var g = d3.select(this);
 
-            // Generate a unique id for the path
-            var arcId = 'id-' + guid();
+            // Reuse the old id, if present. Otherwise, generate a unique id
+            // for the path.
+            var oldPath = g.select('path.arc-path');
+            var arcId = (oldPath.node() && oldPath.attr('id')) ||
+                        'id-' + guid();
 
             g.selectAll('path.arc-path')
                 .data([d])
               .enter()
                 .append('path')
-                .classed('arc-path', true);
-
-            g.selectAll('path.arc-path')
+                .classed('arc-path', true)
                 .attr('id', arcId)
-                .attr('d', function (d) {
-                    return circle_d(radius(d)); });
+                .attr('d', function (d) { return circle_d(radius(d)); });
 
-            g.selectAll('text.arc-text')
-                .data([d])
-              .enter()
+            d3.transition(g.select('path.arc-path'))
+                .attr('d', function (d) { return circle_d(radius(d)); });
+
+            var arcText = g.selectAll('text.arc-text').data([d]);
+
+            arcText.enter()
                 .append('text')
                 .classed('arc-text', true)
-                .append('textPath')
-                .attr('startOffset', '0%');
+                .attr('text-anchor', 'middle')
+                .append('textPath');
 
-            var arcText = g.selectAll('text.arc-text')
-                            .style('font-size', fontSize)
-                            .attr('text-anchor', 'middle');
+            // Not transitioning the `font-size` style since getComptedStyles
+            // for it may not return the actual value which was set in CSS,
+            // e.g., "font-size: 100%" may return "16px" when the font-size
+            // is requested via getComptedStyles. Hence, the font-size will
+            // be unnecessarily transitioned.
+            // Also see: http://stackoverflow.com/a/10145250/987185
+            arcText.style('font-size', fontSize);
 
             /* There is a bug in Chrome which makes it impossible to select
              * camel case tags, like textPath.  Hence, using the :first-child
@@ -50,12 +57,12 @@ d3.circleText = function () {
              * Keep the textPath hidden until the best position
              * has been found.
              */
-            var arcTextPath = arcText.select(':first-child')
-                                  .attr('xlink:href', '#' + arcId)
-                                  .attr('method', method)
-                                  .attr('spacing', spacing)
-                                  .text(value)
-                                  .attr('startOffset', '50%');
+            d3.transition(arcText.select(':first-child'))
+                .attr('xlink:href', '#' + arcId)
+                .attr('method', method)
+                .attr('spacing', spacing)
+                .text(value)
+                .attr('startOffset', position);
         });
 
         return selection.selectAll('text.arc-text');
@@ -81,15 +88,16 @@ d3.circleText = function () {
 
     function circle_d(r) {
         return [ "M0,0",
-                "m", "0,", -r,
-                "a", r, ",", r, " 0 1,0 0,", 2*r,
-                "a", r, ",", r, " 0 1,0 0,", -2*r
-            ].join('');
+                 "m", "0,", -r,
+                 "a", r, ",", r, " 0 1,0 0,", 2*r,
+                 "a", r, ",", r, " 0 1,0 0,", -2*r
+               ].join('');
     }
 
     /***************************************
      * Public properties
      */
+
     _draw.radius = function (_) {
         if (arguments.length === 0) return radius;
         radius = d3.functor(_);
@@ -103,7 +111,12 @@ d3.circleText = function () {
     };
 
     _draw.precision = function (_) {
-        console.warn('circleText.precision has been deprecated.');
+        try {
+            console.warn('circleText.precision has been deprecated.');
+        } catch (e) {
+            // Ignore if the warning could not be displayed.
+        }
+
         if (arguments.length === 0) return precision;
         precision = _;
         return _draw;
@@ -124,6 +137,12 @@ d3.circleText = function () {
     _draw.spacing = function (_) {
         if (arguments.length === 0) return spacing;
         spacing = _;
+        return _draw;
+    };
+
+    _draw.position = function (_) {
+        if (arguments.length === 0) return position;
+        position = _;
         return _draw;
     };
 

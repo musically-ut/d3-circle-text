@@ -110,6 +110,13 @@ The following properties can be controlled by calling the appropriate functions:
   If called without any argument, the default value `"auto"` is returned.
   `value` should be either `"exact"` or `"auto"`.
    
+  * _position([value])_
+  
+  Get/set the [startOffset](http://www.w3.org/TR/SVG/text.html#TextPathElementStartOffsetAttribute) for the `textPath` element.
+  
+  If called without any argument, the default value `"50%"` is returned.
+  `value` should be either a percentage `"25%"` or a length in user-dimensions
+  along the circle. The circle is drawn counter-clock wise.
   
  * _precision([value])_
 
