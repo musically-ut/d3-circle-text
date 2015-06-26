@@ -8,7 +8,7 @@ placing the labels on intermediate nodes non-obtrusively.
 ## Examples
 
  1. [Simple demo](http://bl.ocks.org/musically-ut/5278601)
- 2. [Bubble chart with simple labels](http://bl.ocks.org/musically-ut/5278614#index.html)
+ 2. [Bubble chart with simple labels](http://bl.ocks.org/musically-ut/5278614)
 
 ## Usage
 
