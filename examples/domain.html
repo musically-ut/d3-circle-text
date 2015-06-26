@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <head>
   <meta charset="utf-8">
-  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
   <script src="circle-text.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>
+    var focussedNode = null, root = null;
+    var w = 800, h = 500, r = Math.min(w, h),
+        x = d3.scale.linear().range([(w - r)/2 + 0, (w - r)/2 + r]),
+        y = d3.scale.linear().range([(h - r)/2 + 0, (h - r)/2 + r]),
+        color = d3.scale.category10(),
+        offset = 50, swingDirection = 1;
+
+    var fontSize = function (d) { return (200 / (d.depth + 1)) + "%"; };
+    var circleText = d3.circleText()
+                        .radius(function (d) { return d.r - 5; })
+                        .value(function (d) { return d.name; })
+                        .precision(0.1)
+                        .fontSize(fontSize);
 
     function _nest(values, depth) {
       var firstLevel = {},
@@ -34,7 +46,7 @@
       }
 
       // Collapsing domains
-      while ( res.children && 
+      while ( res.children &&
               res.children.length === 1) {
         res.name = res.children[0].name+ '.' + res.name;
         res.children = res.children[0].children;
@@ -63,13 +75,7 @@
                     .size([opts.w, opts.h]);
 
       var nodes = packer.nodes(nestedDomains);
-
-      var fontSize = function (d) { return (200 / (d.depth + 1)) + "%"; };
-      var circleText = d3.circleText()
-                        .radius(function (d) { return d.r - 5; })
-                        .value(function (d) { return d.name; })
-                        .precision(0.1)
-                        .fontSize(fontSize);
+      root = nodes.filter(function (n) { return n.parent == null; })[0];
 
       var gCircles = vis.selectAll('g.circle')
                         .data(nodes)
@@ -92,6 +98,10 @@
             'stroke-width': '1px',
             fill: function (d) { return "#777"; },
             'fill-opacity': function (d) { return d.children ? 0.5 : 1; },
+          })
+          .on("click", function(d) {
+              zoom(focussedNode == d ? root : d);
+              d3.event.stopPropagation();
           });
 
       var gTexts = vis.selectAll('g.label')
@@ -122,11 +132,6 @@
     function draw(domains) {
       "use strict";
 
-      var w = 800, h = 500,
-          x = d3.scale.linear().range([0, w]),
-          y = d3.scale.linear().range([0, h]),
-          color = d3.scale.category10();
-
       var opts = {
         w: w,
         h: h,
@@ -144,10 +149,45 @@
                     height: h
                   })
                   .append('g')
-                  .attr('transform', 
+                  .attr('transform',
                     'translate(' + 0 + ',' + 0 + ')');
 
       _bubbleChart(vis, nestedDomains, opts);
+    }
+
+    function zoom(d, i) {
+        var k = r / d.r / 2;
+        x.domain([d.x - d.r, d.x + d.r]);
+        y.domain([d.y - d.r, d.y + d.r]);
+
+        var t = d3.select('svg').transition()
+            .duration(d3.event.altKey ? 7500 : 750);
+
+        t.selectAll("g.circle")
+            .attr("transform", function(d) {
+                return 'translate(' + x(d.x) + ',' + y(d.y) + ')';
+            })
+            .select('circle')
+            .attr("r", function(d) {
+                return k * d.r;
+            });
+
+        // Swing the label from left to right.
+        swingDirection = swingDirection * ((offset >= 75 || offset <= 25) ? -1 : 1);
+        offset = offset + swingDirection * 25;
+        circleText
+            .radius(function (d) { return k * d.r - 5; })
+            .position(offset + '%');
+
+        t.selectAll('g.label')
+            .attr("transform", function(d) {
+                return 'translate(' + x(d.x) + ',' + y(d.y) + ')';
+            })
+            .filter(function (d) { return !!d.children; })
+            .call(circleText);
+
+        focussedNode = d;
+        d3.event.stopPropagation();
     }
   </script>
 
@@ -189,7 +229,7 @@
 <body>
 <div id="container"></div>
 <script>
-var domains = [       
+var domains = [
                           '00.names.playground.utkarshu.in',
                           '00.db.playground.utkarshu.in',
                         '00.server.playground.utkarshu.in',
